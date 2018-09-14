@@ -33,7 +33,7 @@ target_link_libraries(
 )
 
 install(TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION /usr/local/lib/
-    PUBLIC_HEADER DESTINATION /usr/local/include/Consulpp/
+    LIBRARY DESTINATION lib/
+    PUBLIC_HEADER DESTINATION include/Consulpp/
 )
 
