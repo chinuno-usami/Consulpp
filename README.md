@@ -1,3 +1,7 @@
+This repo is forked from [base repo](https://github.com/chinuno-usami/Consulpp) to suit for our own project.
+
+------
+
 # Consulpp
 Consul client for C++.
 Based on Consul HTTP API.
