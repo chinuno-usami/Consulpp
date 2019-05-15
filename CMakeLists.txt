@@ -5,15 +5,13 @@ SET(CONSULPP_VERSION_MINOR 1)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -ggdb -DDEBUG")
 
-set(DIR_SRCS
-    ${PROJECT_SOURCE_DIR}/Check.cpp
-    ${PROJECT_SOURCE_DIR}/Consulpp.cpp
-    ${PROJECT_SOURCE_DIR}/ConsulService.cpp)
+aux_source_directory(./src/ DIR_SRCS)
 
 include_directories(
-    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/src
     ${CPPREST_DIR})
-link_directories(${PROJECT_SOURCE_DIR}/)
+
+link_directories(${PROJECT_SOURCE_DIR}/src)
 
 if(BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${DIR_SRCS})
