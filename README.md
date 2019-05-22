@@ -20,6 +20,8 @@ Implemented
 
 ## Build
 
+Because we just have a single header file, so just need to build the test project.
+
 Require compiler supports C++ 11.
 
 ```bash
