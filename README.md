@@ -14,10 +14,6 @@ Implemented
 - Detele KV store
 - Get KV store
 
-**May not add new api interface if i am not using in my projects.**
-
-**PR welcome for new features.**
-
 ## Requirements
 
 [C++ REST SDK](https://github.com/Microsoft/cpprestsdk)
@@ -42,3 +38,7 @@ Refer to test.cpp
 - Health check
 - Different check type (_Now just have `Script+Interval` type, will add `Script+Interval` `Script+Interval` `Script+Interval`_)
 - Bug fix and test
+
+## Note
+
+Some newer APIs may not support for now, if you are intreasting about this project, welcome to commit PR.
