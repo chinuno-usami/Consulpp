@@ -284,8 +284,7 @@ namespace consulpp
         // 移除健康检查项
         void RemoveCheck(const std::string& check_id)
         {
-            discard_if(data_ptr_->checks_,
-                       [&strId](CCheck obj)
+            discard_if(data_ptr_->checks_, [&check_id](CCheck obj)
             {
                 return (obj.GetId() == check_id);
             });
@@ -305,7 +304,7 @@ namespace consulpp
     static const std::string REGISTER_API("/v1/agent/service/register");
     static const std::string DEREGISTER_API("/v1/agent/service/deregister/");
     static const std::string KV_API("/v1/kv/");
-    static const std::string HEALTH_CHECK_API("/v1/health/service"); //http://127.0.0.1:8500/v1/health/service/atelier?tag=session&passing=1
+    static const std::string HEALTH_CHECK_API("/v1/health/service"); //http://127.0.0.1:8500/v1/health/service/atelier?tag=xxx&passing=1
 
     static std::function<bool(http_response)> NoReturnProcessor()
     {
@@ -511,9 +510,31 @@ namespace consulpp
             }
         }
 
-        bool HealthCheck(const std::string& tag_filter, std::unordered_set<ConsulService>& health_services)
+        bool HealthCheck(const std::string& service_name, const std::string& tag_filter, std::unordered_set<ConsulService>& health_services)
         {
-            //TODO:
+            // 请求consul api
+            http_client client(U(data_ptr_->base_url));
+            uri_builder builder(U(HEALTH_CHECK_API));
+
+            builder.append_path(service_name);
+            builder.append_query("tag", tag_filter);
+            builder.append_query("passing", "1");
+
+            auto resp = client.request(methods::GET, builder.to_string()).then(NoReturnProcessor());
+            try
+            {
+                auto json_value = resp.get();
+                //TODO:分析返回的json到ConsulService结构中
+
+
+                return true;
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+                return false;
+            }
+
             return true;
         }
 
@@ -531,7 +552,7 @@ namespace std
     template <>
     struct hash<Check>
     {
-        size_t operator()(const CCheck& obj) const
+        size_t operator()(const Check& obj) const
         {
             return hash<std::string>()(obj.GetId());
         }

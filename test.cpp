@@ -8,7 +8,9 @@ void show_menu()
     std::cout << "3.set value" << std::endl;
     std::cout << "4.delete value" << std::endl;
     std::cout << "5.get value" << std::endl;
-    std::cout << "6.exit" << std::endl;
+    std::cout << "6.health check" << std::endl;
+
+    std::cout << "0.exit" << std::endl;
 }
 
 void register_service(consulpp::Consulpp& ctx)
@@ -27,7 +29,7 @@ void register_service(consulpp::Consulpp& ctx)
     check.SetId("client_test_check");
     check.SetInterval("5s");
     check.SetName("Client test check");
-    check.SetTcp("121.121.1.186:22");
+    check.SetTcp("127.0.0.1:22");
     check.SetTimeout("1s");
     check.SetNote("test note");
     service.SetCheck(check);
@@ -55,9 +57,17 @@ void get_value(consulpp::Consulpp& ctx)
     std::cout << ctx.GetValue("client/client_test") << std::endl;
 }
 
-void health_checl(consulpp::Consulpp& ctx, const std::string& tag_filter)
+void health_check(consulpp::Consulpp& ctx, const std::string& service_name, const std::string& tag_filter)
 {
-    //TODO
+    std::unordered_set<ConsulService> health_services;
+    if (ctx.HealthCheck(service_name, tag_filter, health_services))
+    {
+        //print service info
+    }
+    else
+    {
+        std::cout << "health check failed, please test it" << std::endl;
+    }
 }
 
 int main()
@@ -85,6 +95,8 @@ int main()
             get_value(ctx);
             break;
         case '6':
+            health_check(ctx, "client_test_servie");
+        case '0':
             exit(0);
             break;
         default:
