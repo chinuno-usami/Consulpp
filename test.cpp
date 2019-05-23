@@ -95,7 +95,7 @@ int main()
             get_value(ctx);
             break;
         case '6':
-            health_check(ctx, "client_test_servie");
+            health_check(ctx, "client_test_servie", "test");
         case '0':
             exit(0);
             break;
