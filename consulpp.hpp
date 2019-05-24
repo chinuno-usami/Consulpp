@@ -25,7 +25,6 @@ namespace std
 }
 #endif
 
-
 namespace consulpp
 {
 
@@ -143,7 +142,7 @@ namespace consulpp
     private:
         std::unique_ptr<CheckData> data_ptr_{ nullptr };
     };
-
+    
     //////////////////////////////////////////////////////////////////////////
     template <typename T, typename Comp, typename Alloc, typename Predicate>
     void discard_if(std::unordered_set<T, Comp, Alloc>& c, Predicate pred)
@@ -160,23 +159,7 @@ namespace consulpp
             }
         }
     }
-
-    struct CheckHash
-    {
-        size_t operator()(const Check& rhs) const
-        {
-            return hash<string>()(rhs.GetId());
-        }
-    };
-
-    struct CheckCmp
-    {
-        bool operator()(const Check& lhs, const Check& rhs) const
-        {
-            return lhs.GetId() == rhs.GetId();
-        }
-    };
-
+    
     class ServiceData
     {
     public:
@@ -231,13 +214,13 @@ namespace consulpp
         }
 
         // 获取服务端口
-        const unsigned int& GetPort() const
+        unsigned int GetPort() const
         {
             return data_ptr_->port_;
         }
 
         // 获取服务标签
-        const std::unordered_set<std::string>& GetTags() const
+        std::unordered_set<std::string>& GetTags() const
         {
             return data_ptr_->tags_;
         }
@@ -573,11 +556,20 @@ namespace consulpp
 namespace std
 {
 
-    //Self hash function
+    //self hash function
     template <>
     struct hash<consulpp::Check>
     {
         size_t operator()(const consulpp::Check& obj) const
+        {
+            return hash<std::string>()(obj.GetId());
+        }
+    };
+
+    template <>
+    struct hash<consulpp::ConsulService>
+    {
+        size_t operator()(const consulpp::ConsulService& obj) const
         {
             return hash<std::string>()(obj.GetId());
         }
