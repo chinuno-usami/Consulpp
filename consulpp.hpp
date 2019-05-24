@@ -142,7 +142,7 @@ namespace consulpp
     private:
         std::unique_ptr<CheckData> data_ptr_{ nullptr };
     };
-    
+
     //////////////////////////////////////////////////////////////////////////
     template <typename T, typename Comp, typename Alloc, typename Predicate>
     void discard_if(std::unordered_set<T, Comp, Alloc>& c, Predicate pred)
@@ -159,7 +159,25 @@ namespace consulpp
             }
         }
     }
-    
+}
+
+namespace std
+{
+
+    //self hash function
+    template <>
+    struct hash<consulpp::Check>
+    {
+        size_t operator()(const consulpp::Check& obj) const
+        {
+            return hash<std::string>()(obj.GetId());
+        }
+    };
+
+} // namespace std
+
+namespace consulpp
+{
     class ServiceData
     {
     public:
@@ -333,6 +351,25 @@ namespace consulpp
             // return pplx::task_from_result(json::value());
         };
     }
+
+}
+
+namespace std
+{
+
+    template <>
+    struct hash<consulpp::ConsulService>
+    {
+        size_t operator()(const consulpp::ConsulService& obj) const
+        {
+            return hash<std::string>()(obj.GetId());
+        }
+    };
+
+}
+
+namespace consulpp
+{
 
     class Consulpp
     {
@@ -552,27 +589,3 @@ namespace consulpp
     };
 
 } // namespace consulpp
-
-namespace std
-{
-
-    //self hash function
-    template <>
-    struct hash<consulpp::Check>
-    {
-        size_t operator()(const consulpp::Check& obj) const
-        {
-            return hash<std::string>()(obj.GetId());
-        }
-    };
-
-    template <>
-    struct hash<consulpp::ConsulService>
-    {
-        size_t operator()(const consulpp::ConsulService& obj) const
-        {
-            return hash<std::string>()(obj.GetId());
-        }
-    };
-
-} // namespace std
