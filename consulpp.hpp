@@ -566,19 +566,32 @@ namespace consulpp
             builder.append_query("tag", tag_filter);
             builder.append_query("passing", "1");
 
-            auto resp = client.request(methods::GET, builder.to_string()).then(NoReturnProcessor());
+            auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp)
+            {
+                std::cout << "status:" << resp.status_code() << std::endl;
+                if (resp.status_code() == status_codes::OK)
+                {
+                    //auto json_result = resp.extract_json(true);
+                    std::string result = resp.extract_string(true);
+                    ucout << result << std::endl;;
+                    return true;
+                }
+
+                std::string strError("Register responded body:");
+                strError += resp.extract_json(true).get();
+                std::cout << strError << std::endl;
+                pplx::task_from_result(std::string());
+                return false;
+            });
+
             try
             {
-                auto json_value = resp.get();
-                //TODO:分析返回的json到ConsulService结构中
-
-
-                return true;
+                return resp.get();
             }
             catch (std::exception& e)
             {
                 std::cerr << e.what() << std::endl;
-                return false;
+                return std::string();
             }
 
             return true;
