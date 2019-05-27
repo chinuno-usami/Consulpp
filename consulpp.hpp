@@ -404,6 +404,7 @@ namespace consulpp
             json::value jsonReqData;
             jsonReqData["ID"] = json::value::string(service.GetId());
             jsonReqData["Name"] = json::value::string(service.GetName());
+            jsonReqData["Address"] = json::value::string(service.GetAddress());
             jsonReqData["Port"] = json::value::number(service.GetPort());
 
             // 添加Metas
@@ -566,33 +567,33 @@ namespace consulpp
             builder.append_query("tag", tag_filter);
             builder.append_query("passing", "1");
 
-            auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp)
+            ucout << data_ptr_->base_url << builder.to_string() << std::endl;
+
+            auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp) -> pplx::task<json::value>
             {
-                std::cout << "status:" << resp.status_code() << std::endl;
                 if (resp.status_code() == status_codes::OK)
                 {
-                    //auto json_result = resp.extract_json(true);
-                    std::string result = resp.extract_string(true);
-                    ucout << result << std::endl;;
-                    return true;
+                    ucout << "request OK" << std::endl;
+                    return resp.extract_json();
                 }
 
-                std::string strError("Register responded body:");
-                strError += resp.extract_json(true).get();
-                std::cout << strError << std::endl;
-                pplx::task_from_result(std::string());
-                return false;
-            });
+                return pplx::task_from_result(json::value());
+            })
+            .then([](pplx::task<json::value> previousTask)
+            {
+                try
+                {
+                    const json::value& json_result = previousTask.get();
+                    ucout << json_result.serialize() << std::endl;
 
-            try
-            {
-                return resp.get();
-            }
-            catch (std::exception& e)
-            {
-                std::cerr << e.what() << std::endl;
-                return std::string();
-            }
+                    return true;
+                }
+                catch (const http_exception& e)
+                {
+                    ucerr << e.what() << std::endl;
+                    return false;
+                }
+            });
 
             return true;
         }

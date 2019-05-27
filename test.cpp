@@ -20,7 +20,7 @@ void register_service(consulpp::Consulpp& ctx)
     service.SetId("test_service_id");
     service.SetMeta("version", "1.2.3");
     service.SetMeta("test_meta", "test_meta_value");
-    service.SetName("client_test_servie");
+    service.SetName("client_test_service");
     service.SetPort(22);
     service.SetTag("client");
     service.SetTag("test");
@@ -95,7 +95,8 @@ int main()
             get_value(ctx);
             break;
         case '6':
-            health_check(ctx, "client_test_servie", "test");
+            health_check(ctx, "client_test_service", "test");
+            break;
         case '0':
             exit(0);
             break;

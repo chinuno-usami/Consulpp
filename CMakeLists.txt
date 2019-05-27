@@ -29,7 +29,9 @@ if(BUILD_TEST)
         cpprest
         boost_system
         ssl
-        crypto)
+        crypto
+        pthread
+        dl)
 else()
     message("Single header, do not need build, enjoy.")
 endif()
