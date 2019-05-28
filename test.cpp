@@ -62,7 +62,15 @@ void health_check(consulpp::Consulpp& ctx, const std::string& service_name, cons
     consulpp::ConsulServiceSet health_services;
     if (ctx.HealthCheck(service_name, tag_filter, health_services))
     {
-        //print service info
+        std::cout << "print all services -------------" << std::endl;
+        for (auto iter : health_services)
+        {
+            std::cout << "id = " << iter.GetId() << std::endl;
+            std::cout << "name = " << iter.GetName() << std::endl;
+            std::cout << "ip = " << iter.GetAddress() << std::endl;
+            std::cout << "port = " << iter.GetPort() << std::endl;
+        }
+        std::cout << "--------------------------------" << std::endl;
     }
     else
     {

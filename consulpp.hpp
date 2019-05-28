@@ -199,19 +199,16 @@ namespace consulpp
         ConsulService()
         {
             data_ptr_ = std::make_unique<ConsulServiceData>();
-            ucout << "1. " << data_ptr_.get() << std::endl;
         }
 
         ConsulService(const ConsulService& other)
         {
             data_ptr_ = std::make_unique<ConsulServiceData>(*other.data_ptr_);
-            ucout << "2. " << data_ptr_.get() << std::endl;
         }
 
         ConsulService(ConsulService&& other)
         {
             data_ptr_.swap(other.data_ptr_);
-            ucout << "3. " << data_ptr_.get() << std::endl;
         }
 
         ~ConsulService() = default;
@@ -540,7 +537,7 @@ namespace consulpp
             builder.append_query("tag", tag_filter);
             builder.append_query("passing", "1");
 
-            ucout << data_ptr_->base_url << builder.to_string() << std::endl;
+            //ucout << data_ptr_->base_url << builder.to_string() << std::endl;
 
             auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp) -> pplx::task<json::value>
             {
@@ -551,37 +548,33 @@ namespace consulpp
                 }
 
                 return pplx::task_from_result(json::value());
-            })
-            .then([&](pplx::task<json::value> previousTask)
-            {
-                try
-                {
-                    const json::value& json_result = previousTask.get();
-                    ucout << json_result.serialize() << std::endl;
-
-					const json::array& node_array = json_result.as_array();
-                    for (auto iter = node_array.begin(); iter != node_array.end(); ++iter)
-                    {
-                        const json::object& node = iter->as_object();
-                        const json::object& service_data = node.at(U("Service")).as_object();
-                        ConsulService service;
-                        service.SetId(service_data.at(U("ID")).as_string());
-                        service.SetName(service_data.at(U("Service")).as_string());
-                        service.SetAddress(service_data.at(U("Address")).as_string());
-                        service.SetPort(service_data.at(U("Port")).as_integer());
-                        health_services.insert(service);
-                    }
-
-                    return true;
-                }
-                catch (const http_exception& e)
-                {
-                    ucerr << e.what() << std::endl;
-                    return false;
-                }
             });
+            
+            try
+            {
+                const json::value& json_result = resp.get();
+                //ucout << json_result.serialize() << std::endl;
 
-            return true;
+                const json::array& node_array = json_result.as_array();
+                for (auto iter = node_array.begin(); iter != node_array.end(); ++iter)
+                {
+                    const json::object& node = iter->as_object();
+                    const json::object& service_data = node.at(U("Service")).as_object();
+                    ConsulService service;
+                    service.SetId(service_data.at(U("ID")).as_string());
+                    service.SetName(service_data.at(U("Service")).as_string());
+                    service.SetAddress(service_data.at(U("Address")).as_string());
+                    service.SetPort(service_data.at(U("Port")).as_integer());
+                    health_services.insert(service);
+                }
+
+                return true;
+            }
+            catch (const http_exception& e)
+            {
+                ucerr << e.what() << std::endl;
+                return false;
+            }
         }
 
     private:
