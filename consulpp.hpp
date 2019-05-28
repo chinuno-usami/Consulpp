@@ -28,11 +28,11 @@ namespace std
 namespace consulpp
 {
 
-    class CheckData
+    class ConsulCheckData
     {
     public:
-        CheckData() = default;
-        ~CheckData() = default;
+        ConsulCheckData() = default;
+        ~ConsulCheckData() = default;
 
         std::string id_{};
         std::string name_{};
@@ -42,38 +42,38 @@ namespace consulpp
         std::string tcp_{};
     };
 
-    class Check
+    class ConsulCheck
     {
     public:
-        Check()
+        ConsulCheck()
         {
-            data_ptr_ = std::make_unique<CheckData>();
+            data_ptr_ = std::make_unique<ConsulCheckData>();
         }
 
-        Check(const Check& other)
+        ConsulCheck(const ConsulCheck& other)
         {
-            data_ptr_ = std::make_unique<CheckData>(*other.data_ptr_);
+            data_ptr_ = std::make_unique<ConsulCheckData>(*other.data_ptr_);
         }
 
-        Check(Check&& other)
+        ConsulCheck(ConsulCheck&& other)
         {
             data_ptr_.swap(other.data_ptr_);
         }
 
-        ~Check() = default;
+        ~ConsulCheck() = default;
 
-        bool operator==(const Check& rhs) const
+        bool operator==(const ConsulCheck& rhs) const
         {
             return GetId() == rhs.GetId();
         }
 
-        Check& operator=(const Check& rhs)
+        ConsulCheck& operator=(const ConsulCheck& rhs)
         {
-            data_ptr_ = std::make_unique<CheckData>(*rhs.data_ptr_);
+            data_ptr_ = std::make_unique<ConsulCheckData>(*rhs.data_ptr_);
             return *this;
         }
 
-        Check& operator=(Check&& rhs)
+        ConsulCheck& operator=(ConsulCheck&& rhs)
         {
             data_ptr_.swap(rhs.data_ptr_);
             return *this;
@@ -140,7 +140,7 @@ namespace consulpp
         }
 
     private:
-        std::unique_ptr<CheckData> data_ptr_{ nullptr };
+        std::unique_ptr<ConsulCheckData> data_ptr_{ nullptr };
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -159,30 +159,30 @@ namespace consulpp
             }
         }
     }
-}
 
-namespace std
-{
+	struct ConsulCheckHasher
+	{
+		size_t operator()(const ConsulCheck& obj) const
+		{
+			return std::hash<std::string>()(obj.GetId());
+		}
+	};
 
-    //self hash function
-    template <>
-    struct hash<consulpp::Check>
-    {
-        size_t operator()(const consulpp::Check& obj) const
-        {
-            return hash<std::string>()(obj.GetId());
-        }
-    };
+	struct ConsulCheckCmp
+	{
+		size_t operator()(const ConsulCheck& lhs, const ConsulCheck& rhs) const
+		{
+			return lhs.GetId() == rhs.GetId();
+		}
+	};
 
-} // namespace std
+	using ConsulCheckSet = std::unordered_set<ConsulCheck, ConsulCheckHasher, ConsulCheckCmp>;
 
-namespace consulpp
-{
-    class ServiceData
+    class ConsulServiceData
     {
     public:
-        ServiceData() = default;
-        ~ServiceData() = default;
+        ConsulServiceData() = default;
+        ~ConsulServiceData() = default;
 
         std::string id_{};
         std::string name_{};
@@ -190,7 +190,7 @@ namespace consulpp
         unsigned int port_{ 0 };
         std::unordered_set<std::string> tags_;
         std::unordered_map<std::string, std::string> metas_;
-        std::unordered_set<Check> checks_;
+		ConsulCheckSet checks_;
     };
 
     class ConsulService
@@ -198,135 +198,138 @@ namespace consulpp
     public:
         ConsulService()
         {
-            data_ptr_ = std::make_unique<ServiceData>();
+            data_ptr_ = std::make_unique<ConsulServiceData>();
+            ucout << "1. " << data_ptr_.get() << std::endl;
         }
 
         ConsulService(const ConsulService& other)
         {
-            data_ptr_ = std::make_unique<ServiceData>(*other.data_ptr_);
+            data_ptr_ = std::make_unique<ConsulServiceData>(*other.data_ptr_);
+            ucout << "2. " << data_ptr_.get() << std::endl;
         }
 
         ConsulService(ConsulService&& other)
         {
             data_ptr_.swap(other.data_ptr_);
+            ucout << "3. " << data_ptr_.get() << std::endl;
         }
 
         ~ConsulService() = default;
 
-        // 获取服务名称
         const std::string& GetName() const
         {
             return data_ptr_->name_;
         }
 
-        // 获取服务地址
         const std::string& GetAddress() const
         {
             return data_ptr_->address_;
         }
 
-        // 获取服务ID
         const std::string& GetId() const
         {
             return data_ptr_->id_;
         }
 
-        // 获取服务端口
         unsigned int GetPort() const
         {
             return data_ptr_->port_;
         }
 
-        // 获取服务标签
         std::unordered_set<std::string>& GetTags() const
         {
             return data_ptr_->tags_;
         }
 
-        // 获取元信息
         const std::unordered_map<std::string, std::string>& GetMeta() const
         {
             return data_ptr_->metas_;
         }
 
-        // 获取所有健康检查项目
-        const std::unordered_set<Check>& GetChecks() const
+        const ConsulCheckSet& GetChecks() const
         {
             return data_ptr_->checks_;
         }
 
-        // 设置服务名
         void SetName(const std::string& value)
         {
             data_ptr_->name_ = value;
         }
 
-        // 设置服务地址
         void SetAddress(const std::string& value)
         {
             data_ptr_->address_ = value;
         }
 
-        // 设置Id
         void SetId(const std::string& value)
         {
             data_ptr_->id_ = value;
         }
 
-        // 设置元信息
         void SetMeta(const std::string& key, const std::string& value)
         {
             data_ptr_->metas_.insert(std::make_pair(key, value));
         }
 
-        // 删除元信息
         void RemoveMeta(const std::string& key)
         {
             data_ptr_->metas_.erase(key);
         }
 
-        // 设置服务端口
         void SetPort(unsigned int value)
         {
             data_ptr_->port_ = value;
         }
 
-        // 移除标签
         void RemoveTag(const std::string& value)
         {
             data_ptr_->tags_.erase(value);
         }
 
-        // 添加标签
         void SetTag(const std::string& value)
         {
             data_ptr_->tags_.insert(value);
         }
 
-        // 设置健康检查
-        void SetCheck(const Check& check)
+        void SetCheck(const ConsulCheck& check)
         {
             data_ptr_->checks_.insert(check);
         }
 
-        // 移除健康检查项
         void RemoveCheck(const std::string& check_id)
         {
-            discard_if(data_ptr_->checks_, [&check_id](Check obj)
+            discard_if(data_ptr_->checks_, [&check_id](const ConsulCheck& obj)
             {
                 return (obj.GetId() == check_id);
             });
-            // set都是const对象无法使用remove_if
-            //std::remove_if(std::begin(m_pData->m_setChecks),
-            //               std::end(m_pData->m_setChecks),
-            //               [&strId](Check obj) {
-            //                    return (obj.GetId() == strId);
+			//The object in set is constant, so cannot use remove_if
+            //std::remove_if(std::begin(data_ptr_->checks_),
+            //               std::end(data_ptr_->checks_),
+            //               [&check_id](const Check& obj) {
+            //                    return (obj.GetId() == check_id);
             //                });
         }
     private:
-        std::unique_ptr<ServiceData> data_ptr_{ nullptr };
+        std::unique_ptr<ConsulServiceData> data_ptr_{ nullptr };
     };
 
+	struct ConsulServiceHasher
+	{
+		size_t operator()(const ConsulService& service) const noexcept
+		{
+			return std::hash<std::string>()(service.GetId());
+		}
+	};
+	
+	struct ConsulServiceCmp
+	{
+		bool operator()(const ConsulService& lhs, const ConsulService& rhs) const noexcept
+		{
+			return (lhs.GetId() == rhs.GetId());
+		}
+	};
+
+	using ConsulServiceSet = std::unordered_set<ConsulService, ConsulServiceHasher, ConsulServiceCmp>;
     //////////////////////////////////////////////////////////////////////////
     static const std::string REGISTER_API("/v1/agent/service/register");
     static const std::string DEREGISTER_API("/v1/agent/service/deregister/");
@@ -343,33 +346,12 @@ namespace consulpp
                 return true;
             }
 
-            std::string strError("Register responded body: ");
-            strError += resp.extract_string(true).get();
-            std::cout << strError << std::endl;
+            std::string error_msg("Register responded body: ");
+            error_msg += resp.extract_string(true).get();
+            std::cout << error_msg << std::endl;
             return false;
-            //throw std::exception("register request failed");
-            // return pplx::task_from_result(json::value());
         };
     }
-
-}
-
-namespace std
-{
-
-    template <>
-    struct hash<consulpp::ConsulService>
-    {
-        size_t operator()(const consulpp::ConsulService& obj) const
-        {
-            return hash<std::string>()(obj.GetId());
-        }
-    };
-
-}
-
-namespace consulpp
-{
 
     class Consulpp
     {
@@ -398,65 +380,62 @@ namespace consulpp
             data_ptr_ = std::make_unique<Impl>(host, port);
         }
 
-        // 向consul注册服务
         bool RegisterService(const ConsulService& service)
         {
-            json::value jsonReqData;
-            jsonReqData["ID"] = json::value::string(service.GetId());
-            jsonReqData["Name"] = json::value::string(service.GetName());
-            jsonReqData["Address"] = json::value::string(service.GetAddress());
-            jsonReqData["Port"] = json::value::number(service.GetPort());
+            json::value json_req_data;
+            json_req_data["ID"] = json::value::string(service.GetId());
+            json_req_data["Name"] = json::value::string(service.GetName());
+            json_req_data["Address"] = json::value::string(service.GetAddress());
+            json_req_data["Port"] = json::value::number(service.GetPort());
 
-            // 添加Metas
-            json::value jsonMetas;
-            const auto& mapMetas = service.GetMeta();
-            std::for_each(std::begin(mapMetas), std::end(mapMetas),
-                          [&jsonMetas](std::pair<std::string, std::string> item)
+            //add metas
+            json::value json_metas;
+            const auto& all_metas = service.GetMeta();
+            std::for_each(std::begin(all_metas), std::end(all_metas),
+                          [&json_metas](std::pair<std::string, std::string> item)
             {
-                jsonMetas[item.first] = json::value::string(item.second);
+                json_metas[item.first] = json::value::string(item.second);
             });
-            jsonReqData["Meta"] = jsonMetas;
+            json_req_data["Meta"] = json_metas;
 
-            // 添加tags
-            json::value jsonTags;
-            const auto& setTags = service.GetTags();
-            size_t nTagsCount = 0;
-            std::for_each(std::begin(setTags), std::end(setTags),
-                          [&jsonTags, &nTagsCount](std::string strTag)
+            //add tags
+            json::value json_tags;
+            const auto& all_tags = service.GetTags();
+            size_t tag_count = 0;
+            std::for_each(std::begin(all_tags), std::end(all_tags),
+                          [&json_tags, &tag_count](const std::string& tag)
             {
-                jsonTags[nTagsCount++] = json::value::string(strTag);
+                json_tags[tag_count++] = json::value::string(tag);
             });
 
-            // 添加checks
-            json::value jsonChecks;
-            // 构造单个check的json对象
-            auto ParseCheck = [](const Check & check)
+            //add checks
+            json::value json_checks;
+            auto ParseCheck = [](const ConsulCheck & check)
             {
-                json::value jsonCheck;
-                jsonCheck["ID"] = json::value::string(check.GetId());
-                jsonCheck["Name"] = json::value::string(check.GetName());
-                jsonCheck["TCP"] = json::value::string(check.GetTcp());
-                jsonCheck["Interval"] = json::value::string(check.GetInterval());
-                jsonCheck["Timeout"] = json::value::string(check.GetTimeout());
-                jsonCheck["Notes"] = json::value::string(check.GetNote());
-                return jsonCheck;
+                json::value json_check;
+                json_check["ID"] = json::value::string(check.GetId());
+                json_check["Name"] = json::value::string(check.GetName());
+                json_check["TCP"] = json::value::string(check.GetTcp());
+                json_check["Interval"] = json::value::string(check.GetInterval());
+                json_check["Timeout"] = json::value::string(check.GetTimeout());
+                json_check["Notes"] = json::value::string(check.GetNote());
+                return json_check;
             };
-            const auto& setChecks = service.GetChecks();
-            size_t nChecksCount = 0;
-            std::for_each(std::begin(setChecks), std::end(setChecks),
-                          [&jsonChecks, &nChecksCount, &ParseCheck](Check check)
+            const auto& all_checks = service.GetChecks();
+            size_t check_count = 0;
+            std::for_each(std::begin(all_checks), std::end(all_checks),
+                          [&json_checks, &check_count, &ParseCheck](const ConsulCheck& check)
             {
-                jsonChecks[nChecksCount++] = ParseCheck(check);
+                json_checks[check_count++] = ParseCheck(check);
             });
 
-            jsonReqData["Tags"] = jsonTags;
-            jsonReqData["Checks"] = jsonChecks;
+            json_req_data["Tags"] = json_tags;
+            json_req_data["Checks"] = json_checks;
 
-            // 请求consul api
             http_client client(U(data_ptr_->base_url));
             uri_builder builder(U(REGISTER_API));
 
-            auto resp = client.request(methods::PUT, builder.to_string(), jsonReqData).then(NoReturnProcessor());
+            auto resp = client.request(methods::PUT, builder.to_string(), json_req_data).then(NoReturnProcessor());
             try
             {
                 return resp.get();
@@ -468,10 +447,8 @@ namespace consulpp
             }
         }
 
-        // 向consul注销服务
         bool Deregister(std::string service_id)
         {
-            // 请求consul api
             http_client client(U(data_ptr_->base_url));
             uri_builder builder(U(DEREGISTER_API));
             builder.append_path(service_id);
@@ -490,12 +467,10 @@ namespace consulpp
 
         std::string GetValue(const std::string& key)
         {
-            // 请求consul api
             http_client client(U(data_ptr_->base_url));
             uri_builder builder(U(KV_API));
             builder.append_path(key);
-            // 直接返回原始值，不编码
-            builder.append_query(U("raw"));
+            builder.append_query(U("raw")); //raw
 
             auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp)
             {
@@ -522,7 +497,6 @@ namespace consulpp
 
         bool SetValue(const std::string& key, const std::string& value)
         {
-            // 请求consul api
             http_client client(U(data_ptr_->base_url));
             uri_builder builder(U(KV_API));
             builder.append_path(key);
@@ -557,9 +531,8 @@ namespace consulpp
             }
         }
 
-        bool HealthCheck(const std::string& service_name, const std::string& tag_filter, std::unordered_set<ConsulService>& health_services)
+        bool HealthCheck(const std::string& service_name, const std::string& tag_filter, ConsulServiceSet& health_services)
         {
-            // 请求consul api
             http_client client(U(data_ptr_->base_url));
             uri_builder builder(U(HEALTH_CHECK_API));
 
@@ -579,12 +552,25 @@ namespace consulpp
 
                 return pplx::task_from_result(json::value());
             })
-            .then([](pplx::task<json::value> previousTask)
+            .then([&](pplx::task<json::value> previousTask)
             {
                 try
                 {
                     const json::value& json_result = previousTask.get();
                     ucout << json_result.serialize() << std::endl;
+
+					const json::array& node_array = json_result.as_array();
+                    for (auto iter = node_array.begin(); iter != node_array.end(); ++iter)
+                    {
+                        const json::object& node = iter->as_object();
+                        const json::object& service_data = node.at(U("Service")).as_object();
+                        ConsulService service;
+                        service.SetId(service_data.at(U("ID")).as_string());
+                        service.SetName(service_data.at(U("Service")).as_string());
+                        service.SetAddress(service_data.at(U("Address")).as_string());
+                        service.SetPort(service_data.at(U("Port")).as_integer());
+                        health_services.insert(service);
+                    }
 
                     return true;
                 }

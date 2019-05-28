@@ -25,7 +25,7 @@ void register_service(consulpp::Consulpp& ctx)
     service.SetTag("client");
     service.SetTag("test");
 
-    consulpp::Check check;
+    consulpp::ConsulCheck check;
     check.SetId("client_test_check");
     check.SetInterval("5s");
     check.SetName("Client test check");
@@ -59,7 +59,7 @@ void get_value(consulpp::Consulpp& ctx)
 
 void health_check(consulpp::Consulpp& ctx, const std::string& service_name, const std::string& tag_filter)
 {
-    std::unordered_set<consulpp::ConsulService> health_services;
+    consulpp::ConsulServiceSet health_services;
     if (ctx.HealthCheck(service_name, tag_filter, health_services))
     {
         //print service info
