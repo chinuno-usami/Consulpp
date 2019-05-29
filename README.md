@@ -44,4 +44,4 @@ Refer to test.cpp
 
 ## Note
 
-Some newer APIs may not support for now, if you are intreasting about this project, welcome to commit PR.
+Some newer APIs may not support for now, if you are interesting about this project, welcome to commit PR.
