@@ -331,7 +331,9 @@ static const std::string HEALTH_CHECK_API("/v1/health/service/"); // http://127.
 static std::function<bool(http_response)> NoReturnProcessor()
 {
     return [=](http_response resp) {
+#ifdef _DEBUG
         std::cout << "status:" << resp.status_code() << std::endl;
+#endif
         if (resp.status_code() == status_codes::OK)
         {
             return true;
@@ -455,14 +457,16 @@ public:
         builder.append_query(U("raw")); // raw
 
         auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp) {
+#ifdef _DEBUG
             std::cout << "status:" << resp.status_code() << std::endl;
+#endif
             if (resp.status_code() == status_codes::OK)
             {
                 return resp.extract_string(true);
             }
-            std::string strError("Register responded body:");
-            strError += to_utf8string(resp.extract_string(true).get());
-            std::cout << strError << std::endl;
+            std::string error_msg("Register responded body:");
+            error_msg += to_utf8string(resp.extract_string(true).get());
+            std::cout << error_msg << std::endl;
             return pplx::task_from_result(utility::string_t());
         });
         try
@@ -526,7 +530,9 @@ public:
         auto resp = client.request(methods::GET, builder.to_string()).then([](http_response resp) -> pplx::task<json::value> {
             if (resp.status_code() == status_codes::OK)
             {
+#ifdef _DEBUG
                 ucout << "request OK" << std::endl;
+#endif
                 return resp.extract_json();
             }
 
