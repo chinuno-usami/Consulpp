@@ -3,7 +3,7 @@
 > This repo is forked from [base repo](https://github.com/chinuno-usami/Consulpp) to suit for our own project.
 > I will commit PR to the base repo.
 
-Head-only C++ consul client, based on Consul HTTP API.  
+Header-only C++ consul client, based on Consul HTTP API.  
 Just have single head file.
 
 Implemented
@@ -26,6 +26,7 @@ Because we just have a single header file, so just need to build the test projec
 
 Require compiler supports C++ 11.
 
+Linux OR Windows
 ```bash
 mkdir build
 cd build
@@ -33,14 +34,17 @@ cmake -DBUILD_TEST=ON -DCPPREST_DIR=/path/to/cpprestsdk -DCPPREST_LIB=/path/tp/c
 make
 ```
 
+> Please use the **debug libraray** in debug runtime mode on `Windows` platform.
+
+
 ## Usage
 
-Refer to test.cpp
+Refer to `test.cpp`.
 
 ## TODO
 
-- Different check type (_Now just have `Script+Interval` type, will add `Script+Interval` `Script+Interval` `Script+Interval`_)
-- Bug fix and more test
+- Different check type (_Now just have `Script+Interval` type, will add `Script+Interval` `Script+Interval`. `Script+Interval`_)
+- Bug fix and more test.
 
 ## Note
 
